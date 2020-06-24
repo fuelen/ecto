@@ -317,6 +317,19 @@ defmodule Ecto.Integration.PreloadTest do
     assert [] = pe3.comments
   end
 
+  test "preload through with function" do
+    %Post{id: pid1} = p1 = TestRepo.insert!(%Post{})
+
+    u1 = TestRepo.insert!(%User{name: "foo"})
+
+    %Comment{id: cid} = TestRepo.insert!(%Comment{post_id: pid1, author_id: u1.id})
+
+    TestRepo.preload(p1, comments_authors: fn [id] ->
+      assert id == cid
+      [{id, u1}]
+    end)
+  end
+
   test "preload many_to_many with function" do
     p1 = TestRepo.insert!(%Post{title: "1"})
     p2 = TestRepo.insert!(%Post{title: "2"})
